@@ -2,6 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>David Maldonado</Authors>
+    <Company />
+    <Description>Salesforce Marketing Cloud for .NET
+Retrieve/Update data from/to Data Extensions easily.
+</Description>
+    <PackageTags>SFMC Marketing Cloud Salesforce</PackageTags>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
