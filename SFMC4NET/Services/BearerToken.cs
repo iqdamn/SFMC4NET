@@ -11,17 +11,19 @@ namespace SFMC4NET.Services
 {
     public class BearerToken
     {
-        public async Task<AccessToken> GetAccessToken()
+        private string RequestToken_URL = "https://auth.exacttargetapis.com/v1/requestToken";
+
+        public async Task<AccessToken> GetAccessToken(string clientid, string secret)
         {
             AccessToken token = null;
 
-            RestClient client = new RestClient(GeneralSettings.RequestToken_URL);
+            RestClient client = new RestClient(RequestToken_URL);
 
             //Setting up the request
             RestRequest request = new RestRequest(Method.POST);
             request.AddHeader("Accept", "application/json");
 
-            string jsonPayload = $"{{\"clientId\" : \"{GeneralSettings.ClientId}\",\"clientSecret\":\"{GeneralSettings.Secret}\"}}";
+            string jsonPayload = $"{{\"clientId\" : \"{clientid}\",\"clientSecret\":\"{secret}\"}}";
             request.AddParameter("application/json", jsonPayload, ParameterType.RequestBody);
 
             //Using Polly Retry policy

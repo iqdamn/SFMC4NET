@@ -1,9 +1,6 @@
 ﻿using Polly;
 using RestSharp;
-using SFMC4NET.Attributes;
-using SFMC4NET.Entities;
 using SFMC4NET.Tools;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -13,42 +10,29 @@ using System.Threading.Tasks;
 
 namespace SFMC4NET.Services
 {
-    public class UpsertRows<T> where T : class
+    public partial class DataExtensionManager
     {
-        private string dataextensionExternalKey;
-        private AccessToken token;
-
-        public UpsertRows(string DataExtensionExternalKey, AccessToken accessToken = null)
-        {
-            var attributes = typeof(T).GetCustomAttributes(typeof(DataExtensionAttribute), true);
-
-            if (attributes == null || attributes.Length <= 0)
-                throw new ArgumentException("T must be a class decorated with the attribute DataExtensionAttribute");
-
-            dataextensionExternalKey = DataExtensionExternalKey;
-
-            token = accessToken;
-        }
-
-        public async Task SendRows(List<T> list)
+        private string UpsertURL = "https://www.exacttargetapis.com/hub/v1/dataevents/key:{DE}/rowset";
+        
+        public async Task SendRows<T>(string DataExtensionExternalKey, List<T> list)
         {
             if (token == null || !token.IsValid)
             {
                 BearerToken tokenBuilder = new BearerToken();
-                token = await tokenBuilder.GetAccessToken();
+                token = await tokenBuilder.GetAccessToken(this.clientId, this.secret);
             }
 
-            await InsertRows(list);
+            await InsertRows(DataExtensionExternalKey, list);
         }
 
-        private async Task InsertRows(IList<T> list)
+        private async Task InsertRows<T>(string DataExtensionExternalKey, IList<T> list)
         {
             //Setting up the request
             RestRequest request = new RestRequest(Method.POST);
             request.AddHeader("Accept", "application/json");
             request.AddParameter("Authorization", "Bearer " + token.Token, ParameterType.HttpHeader);
             
-            string upsertURL = GeneralSettings.Upsert_URL.Replace("{DE}", dataextensionExternalKey);
+            string upsertURL = UpsertURL.Replace("{DE}", DataExtensionExternalKey);
 
             RestClient client = new RestClient(upsertURL);
 
@@ -98,7 +82,7 @@ namespace SFMC4NET.Services
                     message.Append("}}");
                 }
 
-                if(item != lastItem)
+                if(item.Equals(lastItem))
                 {
                     message.Append(",");
                 }

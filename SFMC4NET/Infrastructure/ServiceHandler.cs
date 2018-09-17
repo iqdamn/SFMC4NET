@@ -8,10 +8,10 @@ namespace SFMC4NET.Infrastructure
 {
     internal class ServiceHandler
     {
-        public async Task<string> InvokeSOAPService(string request, string soapAction = "Retrieve")
+        public async Task<string> InvokeSOAPService(string request, string MainService_URL, string soapAction = "Retrieve")
         {
             string soapResult = string.Empty;
-            RestClient client = new RestClient(GeneralSettings.MainService_URL);
+            RestClient client = new RestClient(MainService_URL);
             RestRequest serviceRequest = new RestRequest(Method.POST);
             serviceRequest.AddHeader("SOAPAction", soapAction);
             serviceRequest.RequestFormat = DataFormat.Xml;

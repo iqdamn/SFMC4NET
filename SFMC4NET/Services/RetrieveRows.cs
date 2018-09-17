@@ -1,35 +1,46 @@
 ﻿using Newtonsoft.Json;
-using SFMC4NET.Attributes;
 using SFMC4NET.Entities;
 using SFMC4NET.Infrastructure;
 using SFMC4NET.Tools;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
-using System.Linq;
 
 namespace SFMC4NET.Services
 {
-    public class RetrieveRows<T> where T : class
+    public partial class DataExtensionManager
     {
-        private string dataextensionExternalKey;
         private AccessToken token;
+        private string clientId = string.Empty;
+        private string secret = string.Empty;
+        private string stack = "s7";
+        private const string MainServiceURL = "https://webservice.{Stack}.exacttarget.com/Service.asmx";
+        private string serviceURL = string.Empty;
+        
+        public static DataExtensionManager Build { get { return new DataExtensionManager(); } }
 
-        public RetrieveRows(string DataExtensionExternalKey, AccessToken accessToken = null)
+        private DataExtensionManager()
         {
-            var attributes = typeof(T).GetCustomAttributes(typeof(DataExtensionAttribute),true);
-
-            if (attributes == null || attributes.Length <= 0)
-                throw new ArgumentException("T must be a class decorated with the attribute DataExtensionAttribute");
-
-            dataextensionExternalKey = DataExtensionExternalKey;
-
-            token = accessToken;
         }
 
-        public async Task<IList<T>> GetRows(string filter = "")
+        public DataExtensionManager SetStack(string stackNumber)
+        {
+            stack = stackNumber;
+            serviceURL = MainServiceURL.Replace("{Stack}", stack);
+            return this;
+        }
+
+        public DataExtensionManager UsingCredentials(string ClientId, string Secret)
+        {
+            clientId = ClientId;
+            secret = Secret;
+            return this;
+        }
+
+        public async Task<IList<T>> GetRows<T>(string DataExtensionExternalKey, string filter = "")
         {
             List<T> rowList = Activator.CreateInstance<List<T>>();
             RequestParameters parameter = new RequestParameters();
@@ -39,21 +50,21 @@ namespace SFMC4NET.Services
                 parameter.Filter = filter;
             }
 
-            string requestMessage = await GetRequestMessage(parameter);
+            string requestMessage = await GetRequestMessage<T>(DataExtensionExternalKey, parameter);
             ServiceHandler client = new ServiceHandler();
             
-            string response = await client.InvokeSOAPService(requestMessage);
+            string response = await client.InvokeSOAPService(requestMessage, this.serviceURL);
             
             while (!string.IsNullOrEmpty(parameter.RequestId = GetRowList(rowList, response)))
             {
-                requestMessage = await GetRequestMessage(parameter);
-                response = await client.InvokeSOAPService(requestMessage);
+                requestMessage = await GetRequestMessage<T>(DataExtensionExternalKey, parameter);
+                response = await client.InvokeSOAPService(requestMessage, this.serviceURL);
             }
             
             return rowList;
         }
 
-        private string GetRowList(IList<T> list, string response)
+        private string GetRowList<T>(IList<T> list, string response)
         {
             string requestId = string.Empty;
 
@@ -93,19 +104,19 @@ namespace SFMC4NET.Services
         /// Generates the request message to be send in the SOAP call
         /// </summary>
         /// <returns>The generated request message</returns>
-        private async Task<string> GetRequestMessage(RequestParameters parameter = null)
+        private async Task<string> GetRequestMessage<T>(string DataExtensionExternalKey, RequestParameters parameter = null)
         {
             if (token == null || !token.IsValid)
             {
                 BearerToken tokenBuilder = new BearerToken();
-                token = await tokenBuilder.GetAccessToken();
+                token = await tokenBuilder.GetAccessToken(this.clientId, this.secret);
             }
 
             StringBuilder builder = new StringBuilder();
 
             builder.Append($"<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\"><s:Header><fueloauth xmlns=\"http://exacttarget.com\">{token.Token}</fueloauth></s:Header>");
             builder.Append("<s:Body xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"><RetrieveRequestMsg xmlns=\"http://exacttarget.com/wsdl/partnerAPI\">");
-            builder.Append($"<RetrieveRequest><ObjectType>DataExtensionObject[{dataextensionExternalKey}]</ObjectType>");
+            builder.Append($"<RetrieveRequest><ObjectType>DataExtensionObject[{DataExtensionExternalKey}]</ObjectType>");
 
             if(parameter!= null && !string.IsNullOrEmpty(parameter.RequestId))
             {
