@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using SFMC4NET.Entities;
 using SFMC4NET.Infrastructure;
 using SFMC4NET.Tools;
@@ -74,21 +75,63 @@ namespace SFMC4NET.Services
             XmlDocument doc = new XmlDocument();
             doc.LoadXml(response);
             string jsonText = JsonConvert.SerializeXmlNode(doc);
+            JObject jObject = JObject.Parse(jsonText);
 
-            Root root = Root.FromJson(jsonText);
+            string status = string.Empty;
+            string requestResponse = string.Empty;
 
-            if (root == null || root.SoapEnvelope == null || root.SoapEnvelope.SoapBody.RetrieveResponseMsg == null || root.SoapEnvelope.SoapBody.RetrieveResponseMsg.Results == null || root.SoapEnvelope.SoapBody.RetrieveResponseMsg.Results.Length <= 0)
+            var retrieveResponseMsg = jObject.Descendants()
+                .Where(x => x is JObject)
+                .Where(x => x["RetrieveResponseMsg"] != null).First();
+
+            if (retrieveResponseMsg != null)
+            {
+                status = (string)retrieveResponseMsg.SelectToken("$['RetrieveResponseMsg']['OverallStatus']");
+                requestResponse = (string)retrieveResponseMsg.SelectToken("$['RetrieveResponseMsg']['RequestID']");
+            }
+            else
                 return string.Empty;
 
-            PropertiesManager propertiesManager = new PropertiesManager();
-            if(root.SoapEnvelope.SoapBody.RetrieveResponseMsg.OverallStatus != "OK")
+            if (status != "OK")
             {
-                requestId = root.SoapEnvelope.SoapBody.RetrieveResponseMsg.RequestId.ToString();
+                requestId = requestResponse;
             }
-            
-            foreach (Result result in root.SoapEnvelope.SoapBody.RetrieveResponseMsg.Results)
+
+            var results = retrieveResponseMsg.SelectToken("$['RetrieveResponseMsg']['Results']");
+
+            PropertiesManager propertiesManager = new PropertiesManager();
+            Dictionary<string, string> propertiesDictionary = new Dictionary<string, string>();
+
+            //WTF?, DRY!
+            if (results is JArray)
             {
-                var propertiesDictionary = result.Properties.Property.ToDictionary(n => n.Name, v => v.Value);
+                foreach (var prop in results)
+                {
+                    var properties = prop.SelectToken("$['Properties']['Property']");
+
+                    var propList = properties.ToList();
+                    foreach (var item in propList)
+                    {
+                        propertiesDictionary.Add(item["Name"].ToString(), item["Value"].ToString());
+                    }
+
+                    T instance = Activator.CreateInstance<T>();
+                    propertiesManager.CreateInstance<T>(instance, propertiesDictionary);
+
+                    if (instance != null)
+                        list.Add(instance);
+                }
+            }
+            else
+            {
+                var properties = results.SelectToken("$['Properties']['Property']");
+                var propList = properties.ToList();
+
+                foreach (var item in propList)
+                {
+                    propertiesDictionary.Add(item["Name"].ToString(), item["Value"].ToString());
+                }
+
                 T instance = Activator.CreateInstance<T>();
                 propertiesManager.CreateInstance<T>(instance, propertiesDictionary);
 
