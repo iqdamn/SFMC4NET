@@ -108,7 +108,7 @@ namespace SFMC4NET.Services
                 foreach (var prop in results)
                 {
                     var properties = prop.SelectToken("$['Properties']['Property']");
-
+                    propertiesDictionary.Clear();
                     var propList = properties.ToList();
                     foreach (var item in propList)
                     {
