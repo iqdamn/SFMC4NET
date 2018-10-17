@@ -9,11 +9,12 @@ Retrieve/Update data from/to Data Extensions easily.
 </Description>
     <PackageTags>SFMC Marketing Cloud Salesforce</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.2</Version>
-    <AssemblyVersion>1.0.0.2</AssemblyVersion>
-    <FileVersion>1.0.1.2</FileVersion>
+    <Version>1.0.3</Version>
+    <AssemblyVersion>1.0.0.3</AssemblyVersion>
+    <FileVersion>1.0.0.3</FileVersion>
     <PackageProjectUrl>https://github.com/iqdamn/SFMC4NET</PackageProjectUrl>
     <RepositoryUrl>https://github.com/iqdamn/SFMC4NET</RepositoryUrl>
+    <RepositoryType>Github</RepositoryType>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
