@@ -82,7 +82,7 @@ namespace SFMC4NET.Services
                     message.Append("}}");
                 }
 
-                if(item.Equals(lastItem))
+                if(!item.Equals(lastItem))
                 {
                     message.Append(",");
                 }
