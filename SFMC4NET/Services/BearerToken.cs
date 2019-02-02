@@ -13,6 +13,14 @@ namespace SFMC4NET.Services
     {
         private string RequestToken_URL = "https://auth.exacttargetapis.com/v1/requestToken";
 
+        public BearerToken()
+        { }
+
+        public BearerToken(string authenticationURL)
+        {
+            RequestToken_URL = authenticationURL;
+        }
+
         public async Task<AccessToken> GetAccessToken(string clientid, string secret)
         {
             AccessToken token = null;

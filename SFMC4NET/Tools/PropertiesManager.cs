@@ -96,14 +96,17 @@ namespace SFMC4NET.Tools
                 var propValue = property.GetValue(item);
                 string strValue = string.Empty;
 
-                //SFMC requires a very specific format for DateTime
-                if (propValue.GetType() == typeof(DateTime))
-                {
-                    DateTime dateTime = (DateTime)propValue;
-                    strValue = dateTime.ToString("yyyy-MM-ddTHH:mm:ss");
+                if(propValue != null)
+                { 
+                    //SFMC requires a very specific format for DateTime
+                    if (propValue.GetType() == typeof(DateTime))
+                    {
+                        DateTime dateTime = (DateTime)propValue;
+                        strValue = dateTime.ToString("yyyy-MM-ddTHH:mm:ss");
+                    }
+                    else
+                        strValue = propValue.ToString();
                 }
-                else
-                    strValue = propValue.ToString();
 
                 keys.Add(columnName, strValue);
                 
@@ -140,9 +143,21 @@ namespace SFMC4NET.Tools
                 if(properties.ContainsKey(columnName))
                 {
                     Type t = Nullable.GetUnderlyingType(currentProperty.PropertyType) ?? currentProperty.PropertyType;
-                    var propertyValue = Convert.ChangeType(properties[columnName], t);
 
-                    currentProperty.SetValue(obj, propertyValue);
+                    var propValue = properties[columnName];
+
+                    if (propValue != null && !string.IsNullOrEmpty(propValue.ToString()))
+                    {
+                        var propertyValue = Convert.ChangeType(propValue, t);
+                        currentProperty.SetValue(obj, propertyValue);
+                    }
+                    else
+                    {
+                        if (Nullable.GetUnderlyingType(currentProperty.PropertyType) != null)
+                            currentProperty.SetValue(obj, null);
+                        else
+                            currentProperty.SetValue(obj, propValue);
+                    }
                 }
             }
         }

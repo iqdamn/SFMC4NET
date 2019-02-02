@@ -18,7 +18,8 @@ namespace SFMC4NET.Services
         private string clientId = string.Empty;
         private string secret = string.Empty;
         private string stack = "s7";
-        private const string MainServiceURL = "https://webservice.{Stack}.exacttarget.com/Service.asmx";
+        private string MainServiceURL = "https://webservice.{Stack}.exacttarget.com/Service.asmx";
+        private string AuthenticationURL = "https://auth.exacttargetapis.com/v1/requestToken";
         private string serviceURL = string.Empty;
         
         public static DataExtensionManager Build { get { return new DataExtensionManager(); } }
@@ -31,6 +32,18 @@ namespace SFMC4NET.Services
         {
             stack = stackNumber;
             serviceURL = MainServiceURL.Replace("{Stack}", stack);
+            return this;
+        }
+
+        public DataExtensionManager SetMainServiceURL(string url)
+        {
+            MainServiceURL = url;
+            return this;
+        }
+
+        public DataExtensionManager SetAuthenticationURL(string url)
+        {
+            AuthenticationURL = url;
             return this;
         }
 
@@ -100,13 +113,13 @@ namespace SFMC4NET.Services
             var results = retrieveResponseMsg.SelectToken("$['RetrieveResponseMsg']['Results']");
 
             PropertiesManager propertiesManager = new PropertiesManager();
-            Dictionary<string, string> propertiesDictionary = new Dictionary<string, string>();
-
+            
             //WTF?, DRY!
             if (results is JArray)
             {
                 foreach (var prop in results)
                 {
+                    Dictionary<string, string> propertiesDictionary = new Dictionary<string, string>();
                     var properties = prop.SelectToken("$['Properties']['Property']");
                     propertiesDictionary.Clear();
                     var propList = properties.ToList();
@@ -124,19 +137,23 @@ namespace SFMC4NET.Services
             }
             else
             {
-                var properties = results.SelectToken("$['Properties']['Property']");
-                var propList = properties.ToList();
-
-                foreach (var item in propList)
+                if(results != null)
                 {
-                    propertiesDictionary.Add(item["Name"].ToString(), item["Value"].ToString());
+                    var properties = results.SelectToken("$['Properties']['Property']");
+                    var propList = properties.ToList();
+                    Dictionary<string, string> propertiesDictionary = new Dictionary<string, string>();
+
+                    foreach (var item in propList)
+                    {
+                        propertiesDictionary.Add(item["Name"].ToString(), item["Value"].ToString());
+                    }
+
+                    T instance = Activator.CreateInstance<T>();
+                    propertiesManager.CreateInstance<T>(instance, propertiesDictionary);
+
+                    if (instance != null)
+                        list.Add(instance);
                 }
-
-                T instance = Activator.CreateInstance<T>();
-                propertiesManager.CreateInstance<T>(instance, propertiesDictionary);
-
-                if (instance != null)
-                    list.Add(instance);
             }
 
             return requestId;
@@ -151,7 +168,7 @@ namespace SFMC4NET.Services
         {
             if (token == null || !token.IsValid)
             {
-                BearerToken tokenBuilder = new BearerToken();
+                BearerToken tokenBuilder = new BearerToken(AuthenticationURL);
                 token = await tokenBuilder.GetAccessToken(this.clientId, this.secret);
             }
 

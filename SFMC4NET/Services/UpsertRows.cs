@@ -18,7 +18,7 @@ namespace SFMC4NET.Services
         {
             if (token == null || !token.IsValid)
             {
-                BearerToken tokenBuilder = new BearerToken();
+                BearerToken tokenBuilder = new BearerToken(AuthenticationURL);
                 token = await tokenBuilder.GetAccessToken(this.clientId, this.secret);
             }
 
@@ -108,7 +108,7 @@ namespace SFMC4NET.Services
             }
             else
             {
-                throw policyResult.FinalException;
+                throw new System.Exception($"{policyResult.FinalHandledResult.Content}");
             }
         }       
     }

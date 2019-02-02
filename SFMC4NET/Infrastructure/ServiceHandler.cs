@@ -31,7 +31,7 @@ namespace SFMC4NET.Infrastructure
             }
             else
             {
-                throw policyResult.FinalException;
+                throw new System.Exception($"{policyResult.FinalHandledResult.Content}");
             }
 
             return soapResult;
