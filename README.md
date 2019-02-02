@@ -6,10 +6,11 @@
 
 This library will help you to retrieve and upsert data to a Date Extension in Salesforce Marketing Cloud. 
 
-###Entity
+### Entity
 A data entity is required to store the rows coming from the Data Extension as well as to upsert rows to a DE.
 There are some attributes you can use to decorate the entity:
 
+```
 [DataExtension]
 Class level decorator
 
@@ -21,9 +22,10 @@ Flags the field as a Primary Key column in the DE
 
 [IgnoreColumn]
 To ignore fields in the entity
+```
 
 Example:
-
+```
 	[DataExtension]
     internal class SFMC4NET_TestDE
     {
@@ -39,29 +41,36 @@ Example:
 		[IgnoreColumn]
 		public string NonImportantField { get; set; }
     }
+```
 
-###Configuring the DataExtensionManager
+### Configuring the DataExtensionManager
 This is the main object and it has to be configured to commmunicate with Salesforce Marketing Cloud.
 
 You need to know the Salesforce stack on which your instance is running as well as your API credentials, if not provided, it will default to stack 7.
 
+```
 dataExtensionManager = DataExtensionManager.Build
                 .SetStack(stack)
                 .UsingCredentials(clientId,secret);
+```
 
-###Retrieving rows
+### Retrieving rows
 To get data from a DE, you need the DE's External Key:
 
+```
 await dataExtensionManager.GetRows<SFMC4NET_TestDE>(dataExtensionId, string.Empty);
+```
 
-###Sending rows
+### Sending rows
 First you need to build a entity list and then send this list to the DE.
 
+```
 	var list = new List<SFMC4NET_TestDE>();
     var user = new SFMC4NET_TestDE { Id = "2", FirstName = "SecondUser", LastName = "Lastname" };
     list.Add(user);
 
 	await dataExtensionManager.SendRows(dataExtensionId, list);
+```
 
 ## Authors
 
