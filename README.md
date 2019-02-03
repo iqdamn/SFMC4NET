@@ -26,21 +26,21 @@ To ignore fields in the entity
 
 Example:
 ```
-	[DataExtension]
-    internal class SFMC4NET_TestDE
-    {
-        [KeyColumn]
-        public string Id { get; set; }
+[DataExtension]
+internal class SFMC4NET_TestDE
+{
+	[KeyColumn]
+	public string Id { get; set; }
+       
+	public string FirstName { get; set; }
+    public string LastName { get; set; }
         
-		public string FirstName { get; set; }
-        public string LastName { get; set; }
-        
-		[DEColumn(Name = "Birthdate")]
-        public DateTime? TestTime { get; set; }
+	[DEColumn(Name = "Birthdate")]
+    public DateTime? TestTime { get; set; }
 
-		[IgnoreColumn]
-		public string NonImportantField { get; set; }
-    }
+	[IgnoreColumn]
+	public string NonImportantField { get; set; }
+}
 ```
 
 ### Configuring the DataExtensionManager
@@ -65,11 +65,11 @@ await dataExtensionManager.GetRows<SFMC4NET_TestDE>(dataExtensionId, string.Empt
 First you need to build a entity list and then send this list to the DE.
 
 ```
-	var list = new List<SFMC4NET_TestDE>();
-    var user = new SFMC4NET_TestDE { Id = "2", FirstName = "SecondUser", LastName = "Lastname" };
-    list.Add(user);
+var list = new List<SFMC4NET_TestDE>();
+var user = new SFMC4NET_TestDE { Id = "2", FirstName = "SecondUser", LastName = "Lastname" };
+list.Add(user);
 
-	await dataExtensionManager.SendRows(dataExtensionId, list);
+await dataExtensionManager.SendRows(dataExtensionId, list);
 ```
 
 ## Authors
