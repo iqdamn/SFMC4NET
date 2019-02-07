@@ -11,15 +11,13 @@ using System.Threading.Tasks;
 namespace SFMC4NET.Services
 {
     public partial class DataExtensionManager
-    {
-        private string UpsertURL = "https://www.exacttargetapis.com/hub/v1/dataevents/key:{DE}/rowset";
-        
+    {   
         public async Task SendRows<T>(string DataExtensionExternalKey, List<T> list)
         {
-            if (token == null || !token.IsValid)
+            if (accessToken == null || !accessToken.IsValid)
             {
                 BearerToken tokenBuilder = new BearerToken(AuthenticationURL);
-                token = await tokenBuilder.GetAccessToken(this.clientId, this.secret);
+                accessToken = await tokenBuilder.GetAccessToken(this.clientId, this.secret);
             }
 
             await InsertRows(DataExtensionExternalKey, list);
@@ -30,7 +28,7 @@ namespace SFMC4NET.Services
             //Setting up the request
             RestRequest request = new RestRequest(Method.POST);
             request.AddHeader("Accept", "application/json");
-            request.AddParameter("Authorization", "Bearer " + token.Token, ParameterType.HttpHeader);
+            request.AddParameter("Authorization", "Bearer " + accessToken.Token, ParameterType.HttpHeader);
             
             string upsertURL = UpsertURL.Replace("{DE}", DataExtensionExternalKey);
 

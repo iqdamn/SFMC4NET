@@ -24,15 +24,15 @@ namespace SFMC4NET.Services
 
         private async Task<string> GetStartAutomationRequestMessage(AutomationInfo automationInfo)
         {
-            if (token == null || !token.IsValid)
+            if (accessToken == null || !accessToken.IsValid)
             {
                 BearerToken tokenBuilder = new BearerToken(AuthenticationURL);
-                token = await tokenBuilder.GetAccessToken(this.clientId, this.secret);
+                accessToken = await tokenBuilder.GetAccessToken(this.clientId, this.secret);
             }
 
             StringBuilder builder = new StringBuilder();
 
-            builder.Append($"<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\"><s:Header><fueloauth xmlns=\"http://exacttarget.com\">{token.Token}</fueloauth></s:Header>");
+            builder.Append($"<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\"><s:Header><fueloauth xmlns=\"http://exacttarget.com\">{accessToken.Token}</fueloauth></s:Header>");
             builder.Append("<s:Body xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"><PerformRequestMsg xmlns=\"http://exacttarget.com/wsdl/partnerAPI\">");
             builder.Append($"<Options/><Action>start</Action><Definitions><Definition xsi:type=\"Automation\"><PartnerKey xsi:nil=\"true\"/><ObjectID>{automationInfo.ObjectID}</ObjectID></Definition></Definitions>");
 
@@ -43,15 +43,15 @@ namespace SFMC4NET.Services
 
         public async Task<AutomationInfo> GetAutomationInfo(string automationExternalKey)
         {
-            if (token == null || !token.IsValid)
+            if (accessToken == null || !accessToken.IsValid)
             {
                 BearerToken tokenBuilder = new BearerToken(AuthenticationURL);
-                token = await tokenBuilder.GetAccessToken(this.clientId, this.secret);
+                accessToken = await tokenBuilder.GetAccessToken(this.clientId, this.secret);
             }
 
             StringBuilder builder = new StringBuilder();
 
-            builder.Append($"<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\"><s:Header><fueloauth xmlns=\"http://exacttarget.com\">{token.Token}</fueloauth></s:Header>");
+            builder.Append($"<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\"><s:Header><fueloauth xmlns=\"http://exacttarget.com\">{accessToken.Token}</fueloauth></s:Header>");
             builder.Append("<s:Body xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"><RetrieveRequestMsg xmlns=\"http://exacttarget.com/wsdl/partnerAPI\"><RetrieveRequest>");
             builder.Append($"<ObjectType>Automation</ObjectType><Properties>ProgramID</Properties><Properties>Status</Properties><Properties>Name</Properties><Properties>CustomerKey</Properties><Filter xsi:type=\"SimpleFilterPart\"><Property>CustomerKey</Property><SimpleOperator>equals</SimpleOperator><Value>{automationExternalKey}</Value></Filter>");
 
