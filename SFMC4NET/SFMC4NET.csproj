@@ -9,9 +9,9 @@ Retrieve/Update data from/to Data Extensions easily.
 </Description>
     <PackageTags>SFMC Marketing Cloud Salesforce</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.5</Version>
-    <AssemblyVersion>1.0.0.5</AssemblyVersion>
-    <FileVersion>1.0.0.5</FileVersion>
+    <Version>1.0.6-beta</Version>
+    <AssemblyVersion>1.0.0.6</AssemblyVersion>
+    <FileVersion>1.0.0.6</FileVersion>
     <PackageProjectUrl>https://github.com/iqdamn/SFMC4NET</PackageProjectUrl>
     <RepositoryUrl>https://github.com/iqdamn/SFMC4NET</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
@@ -22,9 +22,9 @@ Retrieve/Update data from/to Data Extensions easily.
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    <PackageReference Include="Polly" Version="6.1.0" />
-    <PackageReference Include="RestSharp" Version="106.3.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
+    <PackageReference Include="Polly" Version="7.0.3" />
+    <PackageReference Include="RestSharp" Version="106.6.9" />
   </ItemGroup>
 
 </Project>
