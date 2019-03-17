@@ -14,46 +14,6 @@ namespace SFMC4NET.Services
 {
     public partial class DataExtensionManager
     {
-        private AccessToken token;
-        private string clientId = string.Empty;
-        private string secret = string.Empty;
-        private string stack = "s7";
-        private string MainServiceURL = "https://webservice.{Stack}.exacttarget.com/Service.asmx";
-        private string AuthenticationURL = "https://auth.exacttargetapis.com/v1/requestToken";
-        private string serviceURL = string.Empty;
-        
-        public static DataExtensionManager Build { get { return new DataExtensionManager(); } }
-
-        private DataExtensionManager()
-        {
-        }
-
-        public DataExtensionManager SetStack(string stackNumber)
-        {
-            stack = stackNumber;
-            serviceURL = MainServiceURL.Replace("{Stack}", stack);
-            return this;
-        }
-
-        public DataExtensionManager SetMainServiceURL(string url)
-        {
-            MainServiceURL = url;
-            return this;
-        }
-
-        public DataExtensionManager SetAuthenticationURL(string url)
-        {
-            AuthenticationURL = url;
-            return this;
-        }
-
-        public DataExtensionManager UsingCredentials(string ClientId, string Secret)
-        {
-            clientId = ClientId;
-            secret = Secret;
-            return this;
-        }
-
         public async Task<IList<T>> GetRows<T>(string DataExtensionExternalKey, string filter = "")
         {
             List<T> rowList = Activator.CreateInstance<List<T>>();
@@ -166,15 +126,15 @@ namespace SFMC4NET.Services
         /// <returns>The generated request message</returns>
         private async Task<string> GetRequestMessage<T>(string DataExtensionExternalKey, RequestParameters parameter = null)
         {
-            if (token == null || !token.IsValid)
+            if (accessToken == null || !accessToken.IsValid)
             {
                 BearerToken tokenBuilder = new BearerToken(AuthenticationURL);
-                token = await tokenBuilder.GetAccessToken(this.clientId, this.secret);
+                accessToken = await tokenBuilder.GetAccessToken(this.clientId, this.secret);
             }
 
             StringBuilder builder = new StringBuilder();
 
-            builder.Append($"<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\"><s:Header><fueloauth xmlns=\"http://exacttarget.com\">{token.Token}</fueloauth></s:Header>");
+            builder.Append($"<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\"><s:Header><fueloauth xmlns=\"http://exacttarget.com\">{accessToken.Token}</fueloauth></s:Header>");
             builder.Append("<s:Body xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"><RetrieveRequestMsg xmlns=\"http://exacttarget.com/wsdl/partnerAPI\">");
             builder.Append($"<RetrieveRequest><ObjectType>DataExtensionObject[{DataExtensionExternalKey}]</ObjectType>");
 

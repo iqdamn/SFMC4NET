@@ -7,7 +7,7 @@ using Xunit;
 
 namespace Tests
 {
-    public class UpsertRetrieveRowsTest
+    public partial class SFMC4NET_Tests
     {
         private readonly DataExtensionManager dataExtensionManager;
         private readonly string clientId = "";
@@ -16,8 +16,16 @@ namespace Tests
         private readonly string stack = "";
         private readonly string authenticationURL = "";
 
-        public UpsertRetrieveRowsTest()
+        public SFMC4NET_Tests()
         {
+            DotNetEnv.Env.Load();
+            clientId = DotNetEnv.Env.GetString("ClientId");
+            secret = DotNetEnv.Env.GetString("Secret");
+            stack = DotNetEnv.Env.GetString("Stack");
+            dataExtensionId = DotNetEnv.Env.GetString("TestDE");
+            authenticationURL = DotNetEnv.Env.GetString("AuthenticationURL");
+            automationExternalKey = DotNetEnv.Env.GetString("AutomationId");
+
             dataExtensionManager = DataExtensionManager.Build
                 .SetStack(stack)
                 .SetAuthenticationURL(authenticationURL)
