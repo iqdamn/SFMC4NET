@@ -25,5 +25,24 @@ namespace Tests
             Assert.Null(exception);
             Assert.True(status == "OK");
         }
+
+        [Fact]
+        public async Task ScheduleAutomation()
+        {
+            Exception exception = null;
+            string status = string.Empty;
+
+            try
+            {
+                status = await dataExtensionManager.ScheduleAutomation(automationExternalKey);
+            }
+            catch (Exception ex)
+            {
+                exception = ex;
+            }
+
+            Assert.Null(exception);
+            Assert.True(status == "Program scheduled.");
+        }
     }
 }

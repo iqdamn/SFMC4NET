@@ -2,6 +2,7 @@
 using Newtonsoft.Json.Linq;
 using SFMC4NET.Entities;
 using SFMC4NET.Infrastructure;
+using System;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,6 +23,17 @@ namespace SFMC4NET.Services
             return GetStartStatusFromResponse(response);
         }
 
+        public async Task<string> ScheduleAutomation(string automationExternalKey)
+        {
+            var automationInfo = await GetAutomationInfo(automationExternalKey);
+            var requestMessage = await GetScheduleAutomationRequestMessage(automationInfo);
+
+            ServiceHandler client = new ServiceHandler();
+            string response = await client.InvokeSOAPService(requestMessage, this.serviceURL, "Schedule");
+
+            return GetScheduleStatusFromResponse(response);
+        }
+
         private async Task<string> GetStartAutomationRequestMessage(AutomationInfo automationInfo)
         {
             if (accessToken == null || !accessToken.IsValid)
@@ -37,6 +49,26 @@ namespace SFMC4NET.Services
             builder.Append($"<Options/><Action>start</Action><Definitions><Definition xsi:type=\"Automation\"><PartnerKey xsi:nil=\"true\"/><ObjectID>{automationInfo.ObjectID}</ObjectID></Definition></Definitions>");
 
             builder.Append("</PerformRequestMsg></s:Body></s:Envelope>");
+
+            return builder.ToString();
+        }
+
+        private async Task<string> GetScheduleAutomationRequestMessage(AutomationInfo automationInfo)
+        {
+            if (accessToken == null || !accessToken.IsValid)
+            {
+                BearerToken tokenBuilder = new BearerToken(AuthenticationURL);
+                accessToken = await tokenBuilder.GetAccessToken(this.clientId, this.secret);
+            }
+
+            StringBuilder builder = new StringBuilder();
+
+            builder.Append($"<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\"><s:Header><fueloauth xmlns=\"http://exacttarget.com\">{accessToken.Token}</fueloauth></s:Header>");
+            builder.Append("<s:Body xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"><ScheduleRequestMsg xmlns=\"http://exacttarget.com/wsdl/partnerAPI\">");
+            builder.Append($"<Options/><Action>start</Action><Interactions><Interaction xsi:type=\"Automation\"><PartnerKey xsi:nil=\"true\"/><ObjectID>{automationInfo.ObjectID}</ObjectID></Interaction></Interactions>");
+            builder.Append($"<Schedule><StartDateTime>{DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss")}</StartDateTime><RecurrenceType>Hourly</RecurrenceType><RecurrenceRangeType>EndOn</RecurrenceRangeType><Occurrences>3</Occurrences></Schedule>");
+            builder.Append($"<ScheduleOptions>{DateTime.Now.AddDays(1).ToString("yyyy-MM-ddTHH:mm:ss")}</ScheduleOptions>");
+            builder.Append("</ScheduleRequestMsg></s:Body></s:Envelope>");
 
             return builder.ToString();
         }
@@ -143,6 +175,34 @@ namespace SFMC4NET.Services
                 return null;
 
             return status;
+        }
+
+        private string GetScheduleStatusFromResponse(string response)
+        {
+            if (string.IsNullOrEmpty(response))
+                return null;
+
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml(response);
+            string jsonText = JsonConvert.SerializeXmlNode(doc);
+            JObject jObject = JObject.Parse(jsonText);
+
+            string status = string.Empty;
+            string requestResponse = string.Empty;
+
+            var retrieveResponseMsg = jObject.Descendants()
+                .Where(x => x is JObject)
+                .Where(x => x["ScheduleResponseMsg"] != null).First();
+
+            if (retrieveResponseMsg != null)
+            {
+                status = (string)retrieveResponseMsg.SelectToken("$['ScheduleResponseMsg']['OverallStatus']");
+                requestResponse = (string)retrieveResponseMsg.SelectToken("$['ScheduleResponseMsg']['Results']['Result']['StatusMessage']");
+            }
+            else
+                return null;
+
+            return requestResponse;
         }
     }
 }
