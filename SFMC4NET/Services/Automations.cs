@@ -66,7 +66,7 @@ namespace SFMC4NET.Services
             builder.Append($"<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\"><s:Header><fueloauth xmlns=\"http://exacttarget.com\">{accessToken.Token}</fueloauth></s:Header>");
             builder.Append("<s:Body xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"><ScheduleRequestMsg xmlns=\"http://exacttarget.com/wsdl/partnerAPI\">");
             builder.Append($"<Options/><Action>start</Action><Interactions><Interaction xsi:type=\"Automation\"><PartnerKey xsi:nil=\"true\"/><ObjectID>{automationInfo.ObjectID}</ObjectID></Interaction></Interactions>");
-            builder.Append($"<Schedule><StartDateTime>{DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss")}</StartDateTime><RecurrenceType>Hourly</RecurrenceType><RecurrenceRangeType>EndOn</RecurrenceRangeType><Occurrences>3</Occurrences></Schedule>");
+            builder.Append($"<Schedule><StartDateTime>{DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss")}</StartDateTime><RecurrenceType>Hourly</RecurrenceType><RecurrenceRangeType>EndOn</RecurrenceRangeType><Occurrences>2</Occurrences></Schedule>");
             builder.Append($"<ScheduleOptions>{DateTime.Now.AddDays(1).ToString("yyyy-MM-ddTHH:mm:ss")}</ScheduleOptions>");
             builder.Append("</ScheduleRequestMsg></s:Body></s:Envelope>");
 

@@ -1,6 +1,7 @@
 ﻿using SFMC4NET.Attributes;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace SFMC4NET.Tools
 {
@@ -148,8 +149,15 @@ namespace SFMC4NET.Tools
 
                     if (propValue != null && !string.IsNullOrEmpty(propValue.ToString()))
                     {
-                        var propertyValue = Convert.ChangeType(propValue, t);
-                        currentProperty.SetValue(obj, propertyValue);
+                        if(t == typeof(DateTime))
+                        {
+                            currentProperty.SetValue(obj, DateTime.ParseExact(propValue, "M/d/yyyy h:mm:ss tt", CultureInfo.InvariantCulture));
+                        }
+                        else
+                        {
+                            var propertyValue = Convert.ChangeType(propValue, t);
+                            currentProperty.SetValue(obj, propertyValue);
+                        }
                     }
                     else
                     {

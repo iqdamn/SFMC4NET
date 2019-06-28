@@ -1,5 +1,6 @@
 ﻿using Polly;
 using RestSharp;
+using SFMC4NET.Entities;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -35,6 +36,35 @@ namespace SFMC4NET.Infrastructure
             }
 
             return soapResult;
-        }      
+        }   
+        
+        public async Task<string> InvokeRESTServiceNoBody(string serviceURL, AccessToken accessToken)
+        {
+            string result = string.Empty;
+
+            RestClient client = new RestClient(serviceURL);
+            RestRequest serviceRequest = new RestRequest(Method.GET);
+            serviceRequest.AddHeader("Accept", "application/json");
+            serviceRequest.AddParameter("Authorization", "Bearer " + accessToken.Token, ParameterType.HttpHeader);
+
+            var policy = Policy.Handle<WebException>()
+                .Or<HttpRequestException>()
+                .OrResult<IRestResponse>(r => r.StatusCode != HttpStatusCode.OK)
+                .RetryAsync(3);
+
+            var policyResult = await policy.ExecuteAndCaptureAsync(() => client.ExecuteTaskAsync(serviceRequest));
+
+            if (policyResult.Outcome == OutcomeType.Successful)
+            {
+                IRestResponse webResponse = policyResult.Result;
+                result = webResponse.Content;
+            }
+            else
+            {
+                throw new System.Exception($"{policyResult.FinalHandledResult.Content}");
+            }
+
+            return result;
+        }
     }
 }

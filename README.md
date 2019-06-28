@@ -4,7 +4,7 @@
 
 ## Getting Started
 
-This library will help you to retrieve and upsert data to a Date Extension in Salesforce Marketing Cloud. 
+This library will help you to retrieve and upsert data to a Data Extension in Salesforce Marketing Cloud. 
 
 ### Entity
 A data entity is required to store the rows coming from the Data Extension as well as to upsert rows to a DE.
@@ -79,7 +79,7 @@ await dataExtensionManager.SendRows(dataExtensionId, list);
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
 
 ## Acknowledgments
 

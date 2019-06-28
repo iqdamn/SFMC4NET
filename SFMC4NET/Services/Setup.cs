@@ -1,7 +1,4 @@
 ﻿using SFMC4NET.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SFMC4NET.Services
 {
@@ -15,8 +12,11 @@ namespace SFMC4NET.Services
         private string AuthenticationURL = "https://auth.exacttargetapis.com/v1/requestToken";
         private string UpsertURL = "https://www.exacttargetapis.com/hub/v1/dataevents/key:{DE}/rowset";
         private string EventsURL = "https://www.exacttargetapis.com/interaction/v1/events";
+        private string ContentURL = "https://www.exacttargetapis.com/asset/v1/content";
+        private string BaseRESTURL = "https://www.exacttargetapis.com";
         private string serviceURL = string.Empty;
         private string tenantSubdomain = string.Empty;
+        private bool useOAuth20 = true;
         
         private DataExtensionManager()
         {
@@ -50,6 +50,12 @@ namespace SFMC4NET.Services
             return this;
         }
 
+        public DataExtensionManager UseOAuth2(bool useOAuth)
+        {
+            useOAuth20 = useOAuth;
+            return this;
+        }
+
         public DataExtensionManager UsingToken(string token)
         {
             accessToken = new AccessToken(token);
@@ -61,9 +67,16 @@ namespace SFMC4NET.Services
             tenantSubdomain = subdomain;
             MainServiceURL = $"https://{subdomain}.soap.marketingcloudapis.com/Service.asmx";
             serviceURL = MainServiceURL;
-            AuthenticationURL = $"https://{subdomain}.auth.marketingcloudapis.com/v1/requestToken";
+
+            if (!useOAuth20)
+                AuthenticationURL = $"https://{subdomain}.auth.marketingcloudapis.com/v1/requestToken";
+            else
+                AuthenticationURL = $"https://{subdomain}.auth.marketingcloudapis.com/v2/token";
+
             UpsertURL = "https://" + subdomain + ".rest.marketingcloudapis.com/hub/v1/dataevents/key:{DE}/rowset";
             EventsURL = $"https://{subdomain}.rest.marketingcloudapis.com/interaction/v1/events";
+            ContentURL = $"https://{subdomain}.rest.marketingcloudapis.com/asset/v1/content";
+            BaseRESTURL = $"https://{subdomain}.rest.marketingcloudapis.com";
 
             return this;
         }

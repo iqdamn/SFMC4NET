@@ -24,14 +24,25 @@ namespace SFMC4NET.Services
         public async Task<AccessToken> GetAccessToken(string clientid, string secret)
         {
             AccessToken token = null;
-
+            
             RestClient client = new RestClient(RequestToken_URL);
 
             //Setting up the request
             RestRequest request = new RestRequest(Method.POST);
             request.AddHeader("Accept", "application/json");
 
-            string jsonPayload = $"{{\"clientId\" : \"{clientid}\",\"clientSecret\":\"{secret}\"}}";
+            string jsonPayload = string.Empty;
+            bool usingOAuth20 = RequestToken_URL.Contains("v2");
+
+            if (usingOAuth20)
+            {
+                jsonPayload = $"{{\"client_id\" : \"{clientid}\",\"client_secret\":\"{secret}\",\"grant_type\":\"client_credentials\"}}";
+            }
+            else
+            {
+                jsonPayload = $"{{\"clientId\" : \"{clientid}\",\"clientSecret\":\"{secret}\"}}";
+            }
+            
             request.AddParameter("application/json", jsonPayload, ParameterType.RequestBody);
 
             //Using Polly Retry policy
@@ -47,9 +58,19 @@ namespace SFMC4NET.Services
                 IRestResponse webResponse = policyResult.Result;
                 Dictionary<string, string> responseData = JsonConvert.DeserializeObject<Dictionary<string, string>>(webResponse.Content);
 
-                string rawToken = responseData["accessToken"];
-                string expiresIn = responseData["expiresIn"];
+                string rawToken, expiresIn;
 
+                if(usingOAuth20)
+                {
+                    rawToken = responseData["access_token"];
+                    expiresIn = responseData["expires_in"];
+                }
+                else
+                {
+                    rawToken = responseData["accessToken"];
+                    expiresIn = responseData["expiresIn"];
+                }
+                
                 token = new AccessToken(rawToken, expiresIn);
             }
             else

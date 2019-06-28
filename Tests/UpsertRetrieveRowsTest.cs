@@ -15,6 +15,7 @@ namespace Tests
         private readonly string dataExtensionId = "";
         private readonly string stack = "";
         private readonly string authenticationURL = "";
+        private readonly string tenantSubdomain;
 
         public SFMC4NET_Tests()
         {
@@ -25,10 +26,11 @@ namespace Tests
             dataExtensionId = DotNetEnv.Env.GetString("TestDE");
             authenticationURL = DotNetEnv.Env.GetString("AuthenticationURL");
             automationExternalKey = DotNetEnv.Env.GetString("AutomationId");
+            tenantSubdomain = DotNetEnv.Env.GetString("TenantSubdomain");
 
             dataExtensionManager = DataExtensionManager.Build
                 .SetStack(stack)
-                .SetAuthenticationURL(authenticationURL)
+                .SetTenantSubdomain(tenantSubdomain)
                 .UsingCredentials(clientId,secret);
         }
 
