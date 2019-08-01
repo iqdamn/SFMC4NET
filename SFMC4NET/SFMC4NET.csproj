@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -9,9 +9,9 @@ Retrieve/Update data from/to Data Extensions easily. Trigger Events and Automati
 </Description>
     <PackageTags>SFMC Marketing Cloud Salesforce</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.73-beta</Version>
-    <AssemblyVersion>1.0.0.73</AssemblyVersion>
-    <FileVersion>1.0.0.73</FileVersion>
+    <Version>1.0.74-beta</Version>
+    <AssemblyVersion>1.0.0.74</AssemblyVersion>
+    <FileVersion>1.0.0.74</FileVersion>
     <PackageProjectUrl>https://github.com/iqdamn/SFMC4NET</PackageProjectUrl>
     <RepositoryUrl>https://github.com/iqdamn/SFMC4NET</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
