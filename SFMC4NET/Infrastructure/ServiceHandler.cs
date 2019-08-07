@@ -38,12 +38,12 @@ namespace SFMC4NET.Infrastructure
             return soapResult;
         }   
         
-        public async Task<string> InvokeRESTServiceNoBody(string serviceURL, AccessToken accessToken)
+        public async Task<string> InvokeRESTServiceNoBody(string serviceURL, AccessToken accessToken, Method method = Method.GET)
         {
             string result = string.Empty;
 
             RestClient client = new RestClient(serviceURL);
-            RestRequest serviceRequest = new RestRequest(Method.GET);
+            RestRequest serviceRequest = new RestRequest(method);
             serviceRequest.AddHeader("Accept", "application/json");
             serviceRequest.AddParameter("Authorization", "Bearer " + accessToken.Token, ParameterType.HttpHeader);
 

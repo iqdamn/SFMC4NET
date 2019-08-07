@@ -1,10 +1,15 @@
 ﻿using Newtonsoft.Json;
+using Polly;
+using RestSharp;
 using SFMC4NET.Entities;
 using SFMC4NET.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace SFMC4NET.Services
@@ -65,6 +70,102 @@ namespace SFMC4NET.Services
             }
 
             return categories;
+        }
+
+        public async Task<bool> DoesFolderExist(string id)
+        {
+            bool exists = false;
+            string serviceURL = this.ContentURL + FolderResource + $"/{id}";
+
+            if (accessToken == null || !accessToken.IsValid)
+            {
+                BearerToken tokenBuilder = new BearerToken(AuthenticationURL);
+                accessToken = await tokenBuilder.GetAccessToken(this.clientId, this.secret);
+            }
+
+            ServiceHandler serviceHandler = new ServiceHandler();
+            string result = await serviceHandler.InvokeRESTServiceNoBody(serviceURL, accessToken);
+
+            if(!string.IsNullOrEmpty(result))
+            {
+                if (result.Contains(id))
+                    exists = true;
+            }
+
+            return exists;
+        }
+
+        public async Task<bool> DeleteFolder(string id)
+        {
+            bool exists = false;
+            string serviceURL = this.ContentURL + FolderResource + $"/{id}";
+
+            if (accessToken == null || !accessToken.IsValid)
+            {
+                BearerToken tokenBuilder = new BearerToken(AuthenticationURL);
+                accessToken = await tokenBuilder.GetAccessToken(this.clientId, this.secret);
+            }
+
+            ServiceHandler serviceHandler = new ServiceHandler();
+            string result = await serviceHandler.InvokeRESTServiceNoBody(serviceURL, accessToken, RestSharp.Method.DELETE);
+
+            if (!string.IsNullOrEmpty(result))
+            {
+                if (result.Contains("OK"))
+                    exists = true;
+            }
+
+            return exists;
+        }
+
+        public async Task<string> CreateFolder(string parentId, string name)
+        {
+            string resultId = string.Empty;
+            string serviceURL = this.ContentURL + FolderResource;
+
+            if (accessToken == null || !accessToken.IsValid)
+            {
+                BearerToken tokenBuilder = new BearerToken(AuthenticationURL);
+                accessToken = await tokenBuilder.GetAccessToken(this.clientId, this.secret);
+            }
+
+            RestClient client = new RestClient(serviceURL);
+            RestRequest request = new RestRequest(Method.POST);
+            request.AddHeader("Accept", "application/json");
+            request.AddParameter("Authorization", "Bearer " + accessToken.Token, ParameterType.HttpHeader);
+
+            StringBuilder message = new StringBuilder();
+            message.Append("{\"Name\":\"" + name + "\",\"ParentId\":" + parentId + "}");
+
+            request.AddParameter("application/json", message.ToString(), ParameterType.RequestBody);
+
+            //Using Polly Retry policy
+            var policy = Policy.Handle<WebException>()
+                .Or<HttpRequestException>()
+                .OrResult<IRestResponse>(r => r.StatusCode != HttpStatusCode.Created)
+                .RetryAsync(3);
+
+            var policyResult = await policy.ExecuteAndCaptureAsync(() => client.ExecuteTaskAsync(request));
+            string serviceResult;
+
+            if (policyResult.Outcome == OutcomeType.Successful)
+            {
+                IRestResponse webResponse = policyResult.Result;
+                serviceResult = webResponse.Content;
+
+                Dictionary<string, string> responseObj = JsonConvert.DeserializeObject<Dictionary<string, string>>(serviceResult);
+
+                if(responseObj != null)
+                {
+                    resultId = responseObj["id"];
+                }
+            }
+            else
+            {
+                throw new System.Exception($"{policyResult.FinalHandledResult.Content}");
+            }
+
+            return resultId;
         }
 
         private ContentCategories ParseContentFolderServiceOutput(string serviceOutput)

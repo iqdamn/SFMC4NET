@@ -1,7 +1,6 @@
 ﻿using SFMC4NET.Entities;
 using SFMC4NET.Infrastructure;
 using System;
-using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 

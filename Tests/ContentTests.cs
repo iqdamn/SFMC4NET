@@ -9,6 +9,8 @@ namespace Tests
 {
     public partial class SFMC4NET_Tests
     {
+        private string folderId = string.Empty;
+
         [Fact]
         public async Task GetAllFolders()
         {
@@ -67,6 +69,26 @@ namespace Tests
 
             Assert.Null(exception);
             Assert.True(categories != null);
+        }
+
+        [Fact]
+        public async Task CreateFolder()
+        {
+            Exception exception = null;
+            bool result = false;
+
+            try
+            {
+                folderId = await dataExtensionManager.CreateFolder("251268", "DeleteMe123");
+                result = await dataExtensionManager.DeleteFolder(folderId);
+            }
+            catch (Exception ex)
+            {
+                exception = ex;
+            }
+
+            Assert.Null(exception);
+            Assert.True(result);
         }
     }
 }
