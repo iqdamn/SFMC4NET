@@ -22,7 +22,7 @@ Retrieve/Update data from/to Data Extensions easily. Trigger Events and Automati
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
     <PackageReference Include="Polly" Version="7.0.3" />
     <PackageReference Include="RestSharp" Version="106.6.9" />
   </ItemGroup>
